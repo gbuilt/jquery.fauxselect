@@ -1,0 +1,148 @@
+/*
+ * jQuery JavaScript plugin
+ * https://github.com/gbuilt/jquery.fauxselect
+ * 
+ * Copyright (c) 2012, GBUILT
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and limitations under the License.
+ * 
+ * 
+ * Example Initialization:
+ * $(document).ready(function(){ 
+ * 		$("#mySelectReplacement").fauxSelect(function(){alert($(this).data("perpage"))}); 
+ * });
+ * 
+ * Example HTML Structure
+ * <div class="fauxSelectLabel">
+ * 	<span class="label">Files per page:</span>
+ * 	<span id="mySelectReplacement" class="fauxSelectWrapper">
+ * 		<div class="fauxSelect">
+ * 			<div class="perPage fauxSelectOption active" data-perpage="5">5</div>
+ * 			<div class="perPage fauxSelectOption" data-perpage="10">10</div>
+ * 			<div class="perPage fauxSelectOption" data-perpage="20">20</div>
+ * 		</div>
+ * 	</span>
+ * </div>
+ * 
+ *
+ * Required LESS CSS Styles:
+ * 	
+ *	@customColor: #646D7F;  //everything else is shades of this color -- works best on really dark background.
+ *	.fauxSelectLabel {
+ *		color: #FFFFFF;		//White text on dark bacgrounds looks really nice. Customize this and the BG color.
+ *		display: block;
+ *		font-size: 11px;
+ *		line-height: 18px;
+ *		margin: 2px;
+ *		padding: 0 3px 0 5px;
+ *		position: relative;
+ *		text-align: left;
+ *		white-space: nowrap;
+ *		z-index: 2;
+ *		&:nth-child(1) { z-index: 10; }
+ *		&:nth-child(2) { z-index: 9; }
+ *		&:nth-child(3) { z-index: 8; }
+ *		&:nth-child(4) { z-index: 7; }
+ *		&:nth-child(5) { z-index: 6; }
+ *		&:nth-child(6) { z-index: 5; }
+ *		&:nth-child(7) { z-index: 4; }
+ *		&:nth-child(8) { z-index: 3; }
+ *		&:nth-child(9) { z-index: 2; }
+ *	}
+ *	.fauxSelectWrapper {
+ *		.smallRoundedCorners;
+ *		background: url("/images/icons/select-arrow-down-white.png") no-repeat top right transparent;
+ *		background-color: @customColor*.8;
+ *		display: block;
+ *		margin-left: 4px;
+ *		overflow: hidden;
+ *		position: absolute;
+ *		right: 0px;
+ *		top: 0px;
+ *		.fauxSelect {
+ *			display: block;
+ *			padding-right: 15px;
+ *			position: relative;
+ *		}
+ *		.fauxSelectOption {
+ *			background-color: @customColor*.8;
+ *			box-shadow: 0px 4px 20px -1px rgba(25,25,25,.5);
+ *			-moz-box-shadow: 0px 4px 20px -1px rgba(25,25,25,.5); // Firefox
+ *			-webkit-box-shadow: 0px 4px 20px -1px rgba(25,25,25,.5); // Safari and Chrome
+ *			display: block;
+ *			overflow: hidden;
+ *			padding: 0px 4px 0px 4px;
+ *			position: absolute;
+ *			width: 65px;
+ *			z-index: 3;
+ *			&.active {
+ *				position: relative;
+ *				z-index: 4;
+ *			}
+ *		}
+ *		&.open {
+ *			box-shadow: -2px 2px 5px 0 rgba(25, 25, 25, 0.7);
+ *			-moz-box-shadow: -2px 2px 5px 0 rgba(25, 25, 25, 0.7);    // Firefox
+ *			-webkit-box-shadow: -2px 2px 5px 0 rgba(25, 25, 25, 0.7); // Safari and Chrome
+ *			.fauxSelectOption {
+ *				position: relative;
+ *			}
+ *			.fauxSelectOption:hover {
+ *				background-color: @customColor*1.1;
+ *			}
+ *			.fauxSelectOption.active {
+ *				background-color: @customColor*1.1;
+ *			}
+ *		}
+ *	}
+ *
+ */
+
+jQuery.fn.fauxSelect = function(callback){
+	
+    // support mutltiple elements
+    if (this.length > 1){
+        this.each(function(){$(this).fauxSelect(callback)});
+        return this;
+    }
+	
+	var $c = $(this);
+	//if none selected, default to first being selected
+	if(!$(".active",$c).length) {
+		$(".fauxSelectOption:first",$c).addClass("active");
+	}
+	//init click event on each option with callback trigger, or open/close if clicked container
+	this.bind("click",function(event){
+		var $t = $(event.target);
+		var $s = $(".fauxSelect",$c);
+		//Clicked on an option
+		if($c.hasClass("open") && $t.hasClass("fauxSelectOption")){
+			//Show all options
+			$(".active",$c).removeClass("active");
+			$t.addClass("active");
+			if(typeof(callback)=='function') { //trigger callback
+				callback($t);
+			}
+			//continue below to close up
+		}
+		//Clicked pop-down arrow or selected option so open/close
+		if($c.hasClass("open")){ //it's open so close it
+			//Show all options
+			$c.removeClass("open");
+			return false;
+		} else { //it's closed so open it
+			//hide all options except Active or first
+			$c.addClass("open");
+			return false;
+		}
+	});
+	return this;
+};
